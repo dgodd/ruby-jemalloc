@@ -11,39 +11,15 @@ ENV PATH $GEM_HOME/bin:$PATH
 RUN set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
-		autoconf \
-		bison \
 		bzip2 \
 		ca-certificates \
-		dpkg-dev \
-		gcc \
-		libbz2-dev \
 		libffi-dev \
-		libgdbm-compat-dev \
-		libgdbm-dev \
-		libglib2.0-dev \
 		libgmp-dev \
-		libjemalloc-dev \
-		libncurses-dev \
-		libreadline-dev \
 		libssl-dev \
-		libxml2-dev \
-		libxslt-dev \
 		libyaml-dev \
-		make \
 		procps \
-		ruby \
-		wget \
-		xz-utils \
 		zlib1g-dev \
-    build-essential \
-    curl \
-    git-core \
-    libpq-dev \
-    locales \
-    nodejs \
-    tzdata \
-    unzip \
+		libjemalloc-dev \
 	; \
 	rm -rf /var/lib/apt/lists/* \
   ; \
@@ -53,6 +29,27 @@ RUN set -eux; \
 		echo 'update: --no-document'; \
 	} >> /usr/local/etc/gemrc \
   ; \
+	savedAptMark="$(apt-mark showmanual)"; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
+		autoconf \
+		bison \
+		dpkg-dev \
+		gcc \
+		libbz2-dev \
+		libgdbm-compat-dev \
+		libgdbm-dev \
+		libglib2.0-dev \
+		libncurses-dev \
+		libreadline-dev \
+		libxml2-dev \
+		libxslt-dev \
+		make \
+		ruby \
+		wget \
+		xz-utils \
+	; \
+	rm -rf /var/lib/apt/lists/*; \
 	\
 	wget -O ruby.tar.xz "https://cache.ruby-lang.org/pub/ruby/${RUBY_MAJOR%-rc}/ruby-$RUBY_VERSION.tar.xz"; \
 	echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.xz" | sha256sum --check --strict; \
@@ -83,6 +80,8 @@ RUN set -eux; \
 	make -j "$(nproc)"; \
 	make install; \
 	\
+	apt-mark auto '.*' > /dev/null; \
+	apt-mark manual $savedAptMark > /dev/null; \
 	find /usr/local -type f -executable -not \( -name '*tkinter*' \) -exec ldd '{}' ';' \
 		| awk '/=>/ { print $(NF-1) }' \
 		| sort -u \
@@ -91,6 +90,8 @@ RUN set -eux; \
 		| sort -u \
 		| xargs -r apt-mark manual \
 	; \
+	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+	\
 	cd /; \
 	rm -r /usr/src/ruby; \
 # verify we have no "ruby" packages installed
