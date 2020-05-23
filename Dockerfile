@@ -34,18 +34,26 @@ RUN set -eux; \
 	apt-get install -y --no-install-recommends \
 		autoconf \
 		bison \
+    build-essential \
+    curl \
 		dpkg-dev \
 		gcc \
+    git-core \
 		libbz2-dev \
 		libgdbm-compat-dev \
 		libgdbm-dev \
 		libglib2.0-dev \
 		libncurses-dev \
+    libpq-dev \
 		libreadline-dev \
 		libxml2-dev \
 		libxslt-dev \
+    locales \
 		make \
+    nodejs \
 		ruby \
+    tzdata \
+    unzip \
 		wget \
 		xz-utils \
 	; \
